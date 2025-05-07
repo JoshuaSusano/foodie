@@ -12,10 +12,12 @@ mongo = PyMongo(app)
 @app.route('/register', methods=['POST'])
 def register():
     return "User registered successfully"
-@app.route("/login", methods=['POST'])
+@app.route('/api/login', methods=['POST'])
 def login():
-    return jsonify({
-        "message" : "user logged in successfully"
+    data = request.get_json()
+    user = mongo.db.student_login.find_one({
+       'username': data['username'],
+       'password': data['password']
     })
 @app.route('/preferences', methods = ['POST'])
 def preferences():
