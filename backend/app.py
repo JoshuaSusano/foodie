@@ -1,12 +1,27 @@
-from flask import Flask, jsonify, request
-from flask_cors import CORS     
+from flask import Flask, jsonify, request , Response
+import openai
 from flask_pymongo import PyMongo
 from config import Config
+from dotenv import load_dotenv
+import os
 app = Flask(__name__)
 app.config.from_object(Config)
-CORS(app) 
+openai.api_key = os.getenv('OPENAI_API_KEY')
+load_dotenv()
 mongo = PyMongo(app)
-
+@app.route('/register', methods=['POST'])
+def register():
+    return "User registered successfully"
+@app.route("/login", methods=['POST'])
+def login():
+    return jsonify({
+        "message" : "user logged in successfully"
+    })
+@app.route('/preferences', methods = ['POST'])
+def preferences():
+    return jsonify({
+        "message" : "user preferences updated successfully"
+    })
 @app.route('/ingridients', methods=['GET', 'POST'])
 def add_ingridient():
     if request.method == 'POST':
@@ -26,14 +41,26 @@ def add_ingridient():
         return jsonify(recipes)
  
 
-@app.route('/get-sample-recipe')
+@app.route('/get-sample-recipe', methods=['GET', 'POST'])
 def get_sample_recipe():
-    sample_data = mongo.db.recipes.find_one()
-    if sample_data:
-        sample_data['_id'] = str(sample_data['_id']) 
-        return jsonify(sample_data)
-    else:
-        return jsonify({"message": "No recipes found in the database."})
+    def generate():
+        # Make the API call with the new API method
+        response = openai.completions.create(
+            model="gpt-3.5-turbo",  # or another model
+            prompt="Give me a sample recipe for a cake",
+            stream=True,
+        )
+        for chunk in response:
+            content = chunk.get('choices', [{}])[0].get('text', '')
+            if content:
+                yield content  # Yield each chunk as it comes in
 
+    return Response(generate(), content_type="text/plain")
+
+
+
+        
 if __name__ == '__main__':
     app.run(debug=True)
+
+
