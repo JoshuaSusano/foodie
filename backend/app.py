@@ -5,22 +5,21 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 
-# Initialize Flask app
-app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
 
-# Load environment variables
+app = Flask(__name__)
+CORS(app)  
+
 load_dotenv()
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
-# MongoDB connection setup
+
 client = MongoClient("mongodb://localhost:27017/")
 db = client["foodieDB"]
 collection = db["recipes"]
 
 @app.route("/foods", methods=["GET"])
 def get_foods():
-    """Fetch all food items from the database."""
+
     try:
         foods = collection.find()
         result = [{
@@ -47,7 +46,7 @@ def search_food():
             "category": food["category"],
             "price": food["price"],
             "description": food["description"],
-            "image_url": f"http://localhost:5000/static/images/{food['image_url']}",  # Image URL from the static folder
+            "image_url": f"http://localhost:5000/static/images/{food['image_url']}",  
             "ingredients": food["ingredients"]
         }
         foods.append(food_data)
