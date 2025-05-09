@@ -1,68 +1,61 @@
-from flask import Flask, jsonify, request , Response
+from flask import Flask, jsonify, Response, request
 import openai
-from flask_pymongo import PyMongo
-from config import Config
+from pymongo import MongoClient
+from flask_cors import CORS
 from dotenv import load_dotenv
 import os
+
+# Initialize Flask app
 app = Flask(__name__)
-app.config.from_object(Config)
-openai.api_key = os.getenv('OPENAI_API_KEY')
+CORS(app)  # Enable CORS for all routes
+
+# Load environment variables
 load_dotenv()
-mongo = PyMongo(app)
-@app.route('/register', methods=['POST'])
-def register():
-    return "User registered successfully"
-@app.route('/api/login', methods=['POST'])
-def login():
-    data = request.get_json()
-    user = mongo.db.student_login.find_one({
-       'username': data['username'],
-       'password': data['password']
-    })
-@app.route('/preferences', methods = ['POST'])
-def preferences():
-    return jsonify({
-        "message" : "user preferences updated successfully"
-    })
-@app.route('/ingridients', methods=['GET', 'POST'])
-def add_ingridient():
-    if request.method == 'POST':
-        data = request.get_json()
-        recipe = {
-            'name': data.get('name'),
-            'ingredients': data.get('ingredients'), 
-            'instruction': data.get('instruction')
+openai.api_key = os.getenv('OPENAI_API_KEY')
+
+# MongoDB connection setup
+client = MongoClient("mongodb://localhost:27017/")
+db = client["foodieDB"]
+collection = db["recipes"]
+
+@app.route("/foods", methods=["GET"])
+def get_foods():
+    """Fetch all food items from the database."""
+    try:
+        foods = collection.find()
+        result = [{
+            "id": str(food["_id"]),
+            "name": food["name"],
+            "category": food["category"],
+            "price": food["price"],
+            "image_url": food["image_url"],
+            "ingredients": food["ingredients"]
+        } for food in foods]
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": f"An error occurred while fetching foods: {str(e)}"}), 500
+
+@app.route('/search', methods=['GET'])
+def search_food():
+    name = request.args.get('name', '').lower()
+    result = collection.find({"name": {"$regex": name, "$options": "i"}})
+    foods = []
+    for food in result:
+        food_data = {
+            "id": str(food["_id"]),
+            "name": food["name"],
+            "category": food["category"],
+            "price": food["price"],
+            "description": food["description"],
+            "image_url": f"http://localhost:5000/static/images/{food['image_url']}",  # Image URL from the static folder
+            "ingredients": food["ingredients"]
         }
-        mongo.db.recipes.insert_one(recipe)
-        return jsonify({"message": "Ingridient added successfully!"}), 201
-    else:
-       
-        recipes = list(mongo.db.recipes.find())
-        for recipe in recipes:
-            recipe['_id'] = str(recipe['_id'])
-        return jsonify(recipes)
- 
-
-@app.route('/get-sample-recipe', methods=['GET', 'POST'])
-def get_sample_recipe():
-    def generate():
-        # Make the API call with the new API method
-        response = openai.completions.create(
-            model="gpt-3.5-turbo",  # or another model
-            prompt="Give me a sample recipe for a cake",
-            stream=True,
-        )
-        for chunk in response:
-            content = chunk.get('choices', [{}])[0].get('text', '')
-            if content:
-                yield content  # Yield each chunk as it comes in
-
-    return Response(generate(), content_type="text/plain")
+        foods.append(food_data)
+    return jsonify(foods)
 
 
 
-        
+
+
 if __name__ == '__main__':
     app.run(debug=True)
-
-

@@ -1,4 +1,4 @@
-
+import logo from '../assets/foodie_logo.png';
 import React, { useState, useEffect } from 'react';
 const navbar = () => {
     const [scrolling, setScrolling] = useState(false);
@@ -19,7 +19,11 @@ const navbar = () => {
         }`}
       >
         <div className="flex items-center space-x-4 mx-[70px]">
-          <div className="w-6 h-6 bg-gray-300 rounded-full" />
+        <img 
+           src={logo}
+           alt="Logo"
+           className="w-7 h-7 bg-white border border-black-300 rounded-full" 
+        />
           <span className="text-xl font-bold">Foodie</span>
         </div>
   
