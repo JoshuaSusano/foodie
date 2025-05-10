@@ -1,39 +1,60 @@
-from flask import Flask, jsonify, request
-from flask_cors import CORS     
-from flask_pymongo import PyMongo
-from config import Config
+from flask import Flask, jsonify, Response, request
+import openai
+from pymongo import MongoClient
+from flask_cors import CORS
+from dotenv import load_dotenv
+import os
+
+
 app = Flask(__name__)
-app.config.from_object(Config)
-CORS(app) 
-mongo = PyMongo(app)
+CORS(app)  
 
-@app.route('/ingridients', methods=['GET', 'POST'])
-def add_ingridient():
-    if request.method == 'POST':
-        data = request.get_json()
-        recipe = {
-            'name': data.get('name'),
-            'ingredients': data.get('ingredients'), 
-            'instruction': data.get('instruction')
+load_dotenv()
+openai.api_key = os.getenv('OPENAI_API_KEY')
+
+
+client = MongoClient("mongodb://localhost:27017/")
+db = client["foodieDB"]
+collection = db["recipes"]
+
+@app.route("/foods", methods=["GET"])
+def get_foods():
+
+    try:
+        foods = collection.find()
+        result = [{
+            "id": str(food["_id"]),
+            "name": food["name"],
+            "category": food["category"],
+            "price": food["price"],
+            "image_url": food["image_url"],
+            "ingredients": food["ingredients"]
+        } for food in foods]
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": f"An error occurred while fetching foods: {str(e)}"}), 500
+
+@app.route('/search', methods=['GET'])
+def search_food():
+    name = request.args.get('name', '').lower()
+    result = collection.find({"name": {"$regex": name, "$options": "i"}})
+    foods = []
+    for food in result:
+        food_data = {
+            "id": str(food["_id"]),
+            "name": food["name"],
+            "category": food["category"],
+            "price": food["price"],
+            "description": food["description"],
+            "image_url": f"http://localhost:5000/static/images/{food['image_url']}",  
+            "ingredients": food["ingredients"]
         }
-        mongo.db.recipes.insert_one(recipe)
-        return jsonify({"message": "Ingridient added successfully!"}), 201
-    else:
-       
-        recipes = list(mongo.db.recipes.find())
-        for recipe in recipes:
-            recipe['_id'] = str(recipe['_id'])
-        return jsonify(recipes)
- 
+        foods.append(food_data)
+    return jsonify(foods)
 
-@app.route('/get-sample-recipe')
-def get_sample_recipe():
-    sample_data = mongo.db.recipes.find_one()
-    if sample_data:
-        sample_data['_id'] = str(sample_data['_id']) 
-        return jsonify(sample_data)
-    else:
-        return jsonify({"message": "No recipes found in the database."})
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
