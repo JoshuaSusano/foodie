@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React, { useState } from 'react';
 
 const User_login = () => {
@@ -37,41 +36,12 @@ const User_login = () => {
         )}
 
         <form className="w-full max-w-xs" onSubmit={handleSubmit}>
-=======
-import React from 'react';
-import ccbuild from '../assets/login_image.jpg';
-import logo from '../assets/foodie_logo.png';
-
-const User_login = () => {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100 p-6">
-      {/* Left image panel (hidden on small screens) */}
-      <div className="hidden md:flex w-2/6 h-[450px]">
-        <img src={ccbuild} alt="Building" className="w-full h-full object-cover rounded-l-lg" />
-      </div>
-
-      {/* Login form panel */}
-      <div className="w-full md:w-2/5 flex flex-col items-center bg-white shadow-lg p-6 h-[450px] rounded-r-lg">
-        <img src={logo} alt="Logo" className="w-16 mb-3 mt-6" />
-        <h2 className="text-lg font-semibold text-gray-800 mb-3">Login Your Account</h2>
-
-        {/* Message placeholder */}
-        <div className="w-full max-w-xs mb-4 p-2 rounded text-center bg-red-100 text-red-800">
-          Example error message here
-        </div>
-
-        {/* Login form */}
-        <form className="w-full max-w-xs">
->>>>>>> 5ff5cbe0e54b5d9ccb44be7a4706731119d3d9c0
           <div className="mb-2">
             <label className="block text-gray-700">Username:</label>
             <input
               type="text"
-<<<<<<< HEAD
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-=======
->>>>>>> 5ff5cbe0e54b5d9ccb44be7a4706731119d3d9c0
               placeholder="Enter Username"
               className="w-full p-2 border border-gray-300 rounded"
               required
@@ -81,11 +51,8 @@ const User_login = () => {
             <label className="block text-gray-700">Password:</label>
             <input
               type="password"
-<<<<<<< HEAD
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-=======
->>>>>>> 5ff5cbe0e54b5d9ccb44be7a4706731119d3d9c0
               placeholder="Enter password"
               className="w-full p-2 border border-gray-300 rounded"
               required
