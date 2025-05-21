@@ -1,14 +1,16 @@
 
 import React from 'react';
-import Searchbar from './homepage/searchbar';
+import Home_compile from './homepage/home_compile.jsx';
 import User_login from './Login/user_login';
-import Navbar from './homepage/navbar';     
+import {BrowserRouter as Router , Routes, Route} from 'react-router-dom';
 function App() {
   return (
-<>
-  <Navbar/>
-  <Searchbar/>
-</>
+<Router>
+  <Routes>
+    <Route path='/' element={<User_login/>}/>
+    <Route path='/home' element={<Home_compile/>}/>
+  </Routes>
+</Router>
 )}
 
 export default App;
