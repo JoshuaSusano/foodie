@@ -1,15 +1,10 @@
 from flask import Flask, jsonify, Response, request
-import openai
 from pymongo import MongoClient
 from flask_cors import CORS
-from dotenv import load_dotenv
 import os
 
 app = Flask(__name__)
 CORS(app)  
-
-load_dotenv()
-openai.api_key = os.getenv('OPENAI_API_KEY')
 
 
 client = MongoClient("mongodb://localhost:27017/")
@@ -50,10 +45,5 @@ def search_food():
         }
         foods.append(food_data)
     return jsonify(foods)
-
-
-
-
-
 if __name__ == '__main__':
     app.run(debug=True)
